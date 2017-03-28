@@ -5,9 +5,10 @@ echo "Installing all Islandora Foundation module's required libraries"
 SHARED_DIR=$1
 
 if [ -f "$SHARED_DIR/configs/variables" ]; then
-  # shellcheck source=/dev/null
   . "$SHARED_DIR"/configs/variables
 fi
+
+export PATH="$PATH:$HOME/.config/composer/vendor/bin"
 
 cd "$DRUPAL_HOME"/sites/all/modules || exit
 
@@ -20,4 +21,4 @@ sudo drush -v openseadragon-plugin
 sudo drush -v -y en islandora_openseadragon
 
 # After last drush call from root user, change cache permissions
-sudo chown -R vagrant:vagrant "$HOME_DIR"/.drush
+sudo chown -R ubuntu:ubuntu "$HOME_DIR"/.drush

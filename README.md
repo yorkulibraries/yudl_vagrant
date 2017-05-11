@@ -4,7 +4,7 @@
 
 The is a development environment virtual machine for YUDL 7.x-1.x. It should work on any operating system that supports VirtualBox and Vagrant.
 
-**NOTE**: You will need to be connected to the York University Libraries VPN.
+**NOTE**: You MUST to be connected to the York University Libraries' VPN.
 
 ## Requirements
 
@@ -42,10 +42,6 @@ The default Drupal login details are:
   - username: admin
   - password: islandora
 
-MySQL:
-  - username: root
-  - password: islandora
-
 ssh, scp, rsync:
   - username: ubuntu
   - password: ubuntu
@@ -58,12 +54,11 @@ ssh, scp, rsync:
 
 - Ubuntu 16.04
 - Drupal 7.54
-- MySQL 5.5.49
 - Apache 2.4.7
-- PHP 7
+- PHP 7.0.15
 - Java 8 (Oracle)
-- FITS 1.0.7
-- drush 6.3.0
+- FITS 1.1.0
+- drush 8.1.11
 - jQuery 1.10.2
 
 ## Maintainers

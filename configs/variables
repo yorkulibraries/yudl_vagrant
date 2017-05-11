@@ -9,7 +9,7 @@ DOWNLOAD_DIR="$SHARED_DIR/downloads"
 FFMPEG_VERSION=3.2.4
 
 FITS_HOME="/opt/fits"
-FITS_VERSION=1.0.7
+FITS_VERSION=1.1.0
 
 DRUPAL_HOME="/var/www/yudl"
 

@@ -35,14 +35,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision :shell, path: "./scripts/bootstrap.sh", :args => shared_dir
   config.vm.provision :shell, path: "./scripts/fits.sh", :args => shared_dir
-  config.vm.provision :shell, path: "./scripts/djatoka.sh", :args => shared_dir
+  #config.vm.provision :shell, path: "./scripts/djatoka.sh", :args => shared_dir
   config.vm.provision :shell, path: "./scripts/lamp-server.sh", :args => shared_dir
-  config.vm.provision :shell, path: "./scripts/sleuthkit.sh", :args => shared_dir
-  config.vm.provision :shell, path: "./scripts/ffmpeg.sh", :args => shared_dir
-  config.vm.provision :shell, path: "./scripts/warctools.sh", :args => shared_dir
+  #config.vm.provision :shell, path: "./scripts/sleuthkit.sh", :args => shared_dir
+  #config.vm.provision :shell, path: "./scripts/ffmpeg.sh", :args => shared_dir
+  #config.vm.provision :shell, path: "./scripts/warctools.sh", :args => shared_dir
   config.vm.provision :shell, path: "./scripts/drupal.sh", :args => shared_dir  
-  config.vm.provision :shell, path: "./scripts/islandora_modules.sh", :args => shared_dir, :privileged => false
-  config.vm.provision :shell, path: "./scripts/islandora_libraries.sh", :args => shared_dir, :privileged => false
-  config.vm.provision :shell, path: "./scripts/yul_islandora.sh", :args => shared_dir, :privileged => false
   config.vm.provision :shell, path: "./scripts/post.sh"
 end

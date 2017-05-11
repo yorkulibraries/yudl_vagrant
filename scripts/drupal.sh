@@ -25,6 +25,7 @@ mv composer.phar /usr/local/bin/composer
 cd "$HOME"
 # shellcheck disable=SC2016
 echo 'export PATH="$PATH:$HOME/.config/composer/vendor/bin"' >> .bashrc
+echo 'export PATH="$PATH:$HOME/.config/composer/vendor/bin"' >> /home/ubuntu/.bashrc
 export PATH="$PATH:$HOME/.config/composer/vendor/bin"
 composer global require drush/drush
 cd /root
@@ -46,15 +47,15 @@ cd /var/www || exit
 
 # Download Drupal
 drush dl drupal-7.x --drupal-project-rename=yudl
+mkdir /opt/drupal_private
+cd /var/www/yudl/sites/default
+cp default.settings.php settings.php
+sed -i "s#$databases = array();#$databases = array (\n  'default' => \n  array (\n    'default' => \n    array (\n      'database' => 'dev_yudl',\n      'username' => 'dev_yudl',\n      'password' => 'islandora',\n      'host' => '10.0.0.14',\n      'port' => '',\n      'driver' => 'mysql',\n      'prefix' => '',\n    ),\n  ),\n);#" settings.php
+chmod 444 settings.php
 
 # Permissions
-chown -R www-data:www-data yudl
-chmod -R g+w yudl
-
-# Do the install
-cd yudl || exit
-drush si -y --db-url=mysql://root:islandora@localhost/drupal7 --site-name=yudl-development.org
-drush user-password admin --password=islandora
+chown -R www-data:www-data /var/www/yudl /opt/drupal_private
+chmod -R g+w /var/www/yudl
 
 # Enable proxy module
 ln -s /etc/apache2/mods-available/proxy.load /etc/apache2/mods-enabled/proxy.load
@@ -93,17 +94,6 @@ read -d '' APACHE_CONFIG << APACHE_CONFIG_TEXT
 		Order deny,allow
 		Allow from all
 	</Proxy>
-
-	ProxyPass /fedora/get http://localhost:8080/fedora/get
-	ProxyPassReverse /fedora/get http://localhost:8080/fedora/get
-	ProxyPass /fedora/services http://localhost:8080/fedora/services
-	ProxyPassReverse /fedora/services http://localhost:8080/fedora/services
-	ProxyPass /fedora/describe http://localhost:8080/fedora/describe
-	ProxyPassReverse /fedora/describe http://localhost:8080/fedora/describe
-	ProxyPass /fedora/risearch http://localhost:8080/fedora/risearch
-	ProxyPassReverse /fedora/risearch http://localhost:8080/fedora/risearch
-	ProxyPass /adore-djatoka http://localhost:8080/adore-djatoka
-	ProxyPassReverse /adore-djatoka http://localhost:8080/adore-djatoka
 APACHE_CONFIG_TEXT
 
 sed -i "/<\/VirtualHost>/i $(echo "|	$APACHE_CONFIG" | tr '\n' '|')" $APACHE_CONFIG_FILE
@@ -118,21 +108,44 @@ rm -rf /var/www/html
 service apache2 restart
 
 # Make the modules directory
+cd /var/www/yudl
 if [ ! -d sites/all/modules ]; then
   mkdir -p sites/all/modules
 fi
 cd sites/all/modules || exit
 
-# Modules
-drush dl devel imagemagick ctools jquery_update pathauto xmlsitemap views variable token libraries datepicker date
-drush -y en devel imagemagick ctools jquery_update pathauto xmlsitemap views variable token libraries datepicker_views
+wget http://10.0.0.14/yudl_modules.tar.gz
+tar -xzvf yudl_modules.tar.gz
+rm yudl_modules.tar.gz
+
+
+cd "$DRUPAL_HOME"/sites/all/libraries || exit
+wget http://10.0.0.14/yudl_libraries.tar.gz
+tar -xzvf yudl_libraries.tar.gz
+rm yudl_libraries.tar.gz
+
+cd "$DRUPAL_HOME"/sites/all/themes || exit
+wget http://10.0.0.14/yudl_themes.tar.gz
+tar -xzvf yudl_themes.tar.gz
+rm yudl_themes.tar.gz
+
+chown -hR www-data:www-data "$DRUPAL_HOME"/sites/all/libraries
+chown -hR www-data:www-data "$DRUPAL_HOME"/sites/all/modules
+chown -hR www-data:www-data "$DRUPAL_HOME"/sites/all/themes
+cd "$DRUPAL_HOME"/sites/all/modules
+
+drush dis drush dis memcache
+drush eval "variable_set('islandora_solr_url', '10.0.0.39:8080/solr/yudl')"  
+
+# York logo
+cd "$DRUPAL_HOME"/sites/deftault/files
+wget https://digital.library.yorku.ca/sites/default/files/yorklogo-small.png
+
+drush cc all
 
 drush dl coder
 drush -y en coder
-
-drush dl advanced_help chart chosen cron_debug devel entity features fontawesome geofield google_analytics i18n icon imagemagick leaflet markdown memcache metatag mollom nagios pathauto plupload redirect remove_generator schemaorg smart_ip smtp subpathauto superfish tabtamer token uofm_maintenance_scripts variable views views_bootstrap views_infinite_scroll views_slideshow webform xmlsitemap
-
-drush -y en advanced_help chart chosen cron_debug devel entity features fontawesome geofield i18n icon imagemagick leaflet markdown memcache metatag mollom nagios pathauto plupload redirect remove_generator schemaorg smart_ip smtp subpathauto superfish tabtamer token uofm_maintenance_scripts variable views views_bootstrap views_infinite_scroll views_slideshow webform xmlsitemap
+chown -hR www-data:www-data "$DRUPAL_HOME"/sites/all/modules
 
 # php.ini templating
 #cp -v "$SHARED_DIR"/configs/php.ini /etc/php5/apache2/php.ini
@@ -145,7 +158,3 @@ if [ ! -d files ]; then
   mkdir files
 fi
 chown -hR www-data:www-data files
-
-# Run cron
-cd "$DRUPAL_HOME"/sites/all/modules || exit
-drush cron

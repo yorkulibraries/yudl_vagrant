@@ -135,11 +135,6 @@ chown -hR www-data:www-data "$DRUPAL_HOME"/sites/all/themes
 cd "$DRUPAL_HOME"/sites/all/modules
 
 drush dis drush dis memcache
-drush eval "variable_set('islandora_solr_url', '10.0.0.39:8080/solr/yudl')"  
-
-# York logo
-cd "$DRUPAL_HOME"/sites/deftault/files
-wget https://digital.library.yorku.ca/sites/default/files/yorklogo-small.png
 
 drush cc all
 
@@ -158,3 +153,13 @@ if [ ! -d files ]; then
   mkdir files
 fi
 chown -hR www-data:www-data files
+
+# York logo
+cd "$DRUPAL_HOME"/sites/deftault/files
+wget https://digital.library.yorku.ca/sites/default/files/yorklogo-small.png
+
+# Set correct permissions on sites/default/files
+chmod -R 774 "$DRUPAL_HOME"/sites/default/files
+
+cd "$DRUPAL_HOME"/sites/all/modules
+drush -v eval "variable_set('islandora_solr_url', 'http://10.0.0.39:8080/solr/yudl')"
